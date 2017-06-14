@@ -12,7 +12,7 @@ done
 while getopts :n option
 do
   case "${option}" in
-    a) K5CREDS=false;;
+    n) K5CREDS=false;;
     \?) echo "Invalid option -${OPTARG}";;
   esac
 done
