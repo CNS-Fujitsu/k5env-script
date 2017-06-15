@@ -68,13 +68,13 @@ OS_AUTH_TOKEN=$(echo "$RETURN" | awk '/X-Subject-Token/ {print $2}')
 USER_ID=$(echo "$RETURN" | grep "\"token\"" | jq -r .token.user.id )
 
 # Extract all the projects listed in the returned auth JSON
-CSV=$(curl -X GET -k -s $IDENTITYV3/users/$USER_ID/projects -H "X-Auth-Token: $OS_AUTH_TOKEN" | jq -r '[(.projects[] | {name,description,enabled,id})] | (.[0] | keys_unsorted) as $keys | $keys, map([.[ $keys[] ]])[] | @csv')
+CSV=$(curl -X GET -k -s $IDENTITYV3/users/$USER_ID/projects -H "X-Auth-Token: $OS_AUTH_TOKEN" | jq -r '[(.projects[] | {name,description,enabled,id})] | (.[0] | keys) as $keys | $keys, map([.[ $keys[] ]])[] | @csv')
 
 # Save the projects to a csv in the current folder
 echo "$CSV" > "./${CONTRACT}_projects.csv"
 
 # Find the project id for the project name from the creds file
-PROJECT_ID=$(echo "$CSV" | grep "\"$PROJECT\"" | cut -f 4 -d ',' | tr -d '"')
+PROJECT_ID=$(echo "$CSV" | grep "\"$PROJECT\"" | cut -f 3 -d ',' | tr -d '"')
 if [ -z "$PROJECT_ID" ]; then
   echo "Project: $PROJECT not found!"
   # Project not found, no point continuing...
@@ -86,11 +86,11 @@ fi
 
 # Get a scoped token using the project id
 RETURN=$(curl -k -X POST -si $IDENTITYV3/auth/tokens -H "Content-Type:application/json" -H "Accept:application/json" -d '{"auth":{"identity":{"methods":["password"],"password":{"user":{"domain":{"name":"'$CONTRACT'"}, "name":"'$USER'", "password": "'"$PW"'"}}}, "scope": { "project": {"id":"'$PROJECT_ID'"}}}}')
-OS_AUTH_TOKEN=$(echo "$RETURN" | awk '/X-Subject-Token/ {print $2}')
+OS_AUTH_TOKEN=$(echo -n "$RETURN" | awk '/X-Subject-Token/ {print $2}' | tr -d '\r\n')
 echo "OS_AUTH_TOKEN: $OS_AUTH_TOKEN"
 
 # Get the api endpoints from the returned auth JSON
-ENDPOINTS=$(echo "$RETURN" | grep '"token"' | jq -r '[.token.catalog[].endpoints[] | {name,url}] | (.[0] | keys_unsorted) as $keys | map([.[ $keys[] ]])[] | @csv' | sort)
+ENDPOINTS=$(echo "$RETURN" | grep '"token"' | jq -r '[.token.catalog[].endpoints[] | {name,url}] | (.[0] | keys) as $keys | map([.[ $keys[] ]])[] | @csv' | sort)
 
 # Check to see if API endpoints have been set, and if so, are they still correct?
 EPREQ=false
