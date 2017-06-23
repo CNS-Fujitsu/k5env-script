@@ -2,19 +2,13 @@
 set -a
 OPTIND=1
 
+# set string comparisons to case insensitive
+shopt -s nocasematch
+
 # Check if we have any k5creds files, if not set K5CREDS false so we can prompt for them
 for f in ./k5creds_*.txt; do
     [ -e "$f" ] && K5CREDS=true || K5CREDS=false
     break
-done
-
-# Check if called with -n (add new credentials), if so set K5CREDS false so we can prompt for them
-while getopts :n option
-do
-  case "${option}" in
-    n) K5CREDS=false;;
-    \?) echo "Invalid option -${OPTARG}";;
-  esac
 done
 
 if $K5CREDS ; then
@@ -22,22 +16,36 @@ if $K5CREDS ; then
   read -r -a CREDS <<< $(find . -name k5creds_\*.txt | cut -f 2- -d '_' | cut -f 1 -d '.' | sort)
 
   # present choices to user and wait for selection
-  echo "Choose credentials to use:"
+  echo -e "\nChoose credentials to use:\n"
   for INDEX in "${!CREDS[@]}"
   do
-      echo -e "$(($INDEX+1)) \t ${CREDS[INDEX]}"
+      echo -e "$(($INDEX+1))) \t ${CREDS[INDEX]}"
   done
+  echo -e "N) \t Enter new credentials\n"
+  if [ "$INDEX" -eq 0 ] ; then
+    echo -e "[1 or N]: \c"
+  else
+    echo -e "[Enter 1 - $((INDEX + 1)) or N]: \c"
+  fi
   read CHOICE
-  CHOICE=$(($CHOICE-1))
+  if [[ "$CHOICE" = "N" ]] ; then
+    # We've been asked to create new credentials, set K5CREDS false
+    K5CREDS=false
+  else
+    CHOICE=$(($CHOICE-1))
+    
+    # read the chosen creds file and set auth vars
+    FILE="./k5creds_${CREDS[$CHOICE]}.txt"
+    while IFS= read LINE || [[ -n "$LINE" ]]
+    do
+      export "$LINE"
+    done <"$FILE"
+  fi
+fi
 
-  # read the chosen creds file and set auth vars
-  FILE="./k5creds_${CREDS[$CHOICE]}.txt"
-  while IFS= read LINE || [[ -n "$LINE" ]]
-  do
-    export "$LINE"
-  done <"$FILE"
-else
-  echo "Building k5creds file: "
+# Create a new k5creds file if necessary
+if ! $K5CREDS ; then
+  echo -e "\nBuilding k5creds file: "
   echo -n "Enter a friendly name to identify these credentials: "
   read CREDFILE
   echo -n "Enter your contract id: "
@@ -74,7 +82,7 @@ CSV=$(curl -X GET -k -s $IDENTITYV3/users/$USER_ID/projects -H "X-Auth-Token: $O
 echo "$CSV" > "./${CONTRACT}_projects.csv"
 
 # Find the project id for the project name from the creds file
-PROJECT_ID=$(echo "$CSV" | grep "\"$PROJECT\"" | cut -f 3 -d ',' | tr -d '"')
+PROJECT_ID=$(echo "$CSV" | grep -i "\"$PROJECT\"" | cut -f 3 -d ',' | tr -d '"')
 if [ -z "$PROJECT_ID" ]; then
   echo "Project: $PROJECT not found!"
   # Project not found, no point continuing...
@@ -139,5 +147,4 @@ unset ENDPOINT
 unset ENDPOINTS
 unset EP_NAME
 unset EP_URL
-
-
+shopt -u nocasematch
