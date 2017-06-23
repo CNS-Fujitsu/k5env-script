@@ -10,8 +10,7 @@ USER=YourUserName
 PW=YourPasword
 REGION=K5Region
   
-If no k5creds files exist you wil be prompted to enter details after which a file will be saved for future use.
-You can also force creation of a new k5creds file by calling the script with parameter -n
+If no k5creds files exist you will be prompted to enter details after which a file will be saved for future use.
 API environment variables will only be set if required
 
 The script should be dot sourced when called:
@@ -19,11 +18,15 @@ The script should be dot sourced when called:
 $ . ./set-k5env.sh
 
 Choose credentials to use:
-1        CTO
-2        CTO_Labs
-3        DE-Scratch01a
-4        MIS_Imp
-2
+
+1)       CTO
+2)       CTO_Labs
+3)       DE-Scratch01a
+4)       MIS_Imp
+N)       Enter new credentials
+
+[Enter 1 - 4 or N]: 2
+
 Project Name: UK_HIT_CTO_Labs
 Project ID:   fdfce7c87ec6a74287946c46a060ba4a
 OS_AUTH_TOKEN: db45caef97074d5abfe0b66bd63b7845
