@@ -2,10 +2,9 @@
 
 ```
 Script to retrieve an authentication token and configure environment vars for API endpoints and Openstack python clients etc.
-Reads credentials from files named k5creds_YourFriendlyName.txt - files should be formatted as follows:
+Reads credentials from files named k5creds_CONTRACT-USER.txt - files are formatted as follows:
 
 CONTRACT=YourContractID
-PROJECT=YourProjectName
 USER=YourUserName
 PW=YourPasword
 REGION=K5Region
@@ -19,13 +18,20 @@ $ . ./set-k5env.sh
 
 Choose credentials to use:
 
-1)       CTO
-2)       CTO_Labs
-3)       DE-Scratch01a
-4)       MIS_Imp
+1)       uHyysKjl-my.user
+2)       PkWwjNsx-auser
+3)       OqhYddfT-username
 N)       Enter new credentials
 
-[Enter 1 - 4 or N]: 2
+[Enter 1 - 3 or N]:
+
+Enter all or part of your project name (leave blank to see all): cto
+1)       AT_CTO_PS
+2)       UK_HIT_CTO
+3)       UK_HIT_CTO_Labs
+4)       UK_HIT_CTO_LEMP_Test
+
+[Enter 1 - 4]: 2
 
 Project Name: UK_HIT_CTO_Labs
 Project ID:   fdfce7c87ec6a74287946c46a060ba4a
