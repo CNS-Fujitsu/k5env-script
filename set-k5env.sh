@@ -59,7 +59,7 @@ if ! $K5CREDS ; then
   echo -n "Enter your region: "
   read REGION
   echo REGION=$REGION >> $CREDFILE
-  mv $CREDFILE ./k5creds_${CONTRACT}-${USER}.txt
+  mv $CREDFILE ./k5creds_${CONTRACT}-${USER}-${REGION}.txt
 fi
 
 # Set auth api endpoint for required region
