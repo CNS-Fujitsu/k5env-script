@@ -2,7 +2,12 @@
 set -a
 OPTIND=1
 
-# set string comparisons to case insensitive
+# Decide if endpoint URLs should be full including API version and project id where applicable
+# as returned by keystone, or truncated at the host as per the examples in the documentation
+# EPFULL=true for the full endpoint URL, EPFULL=false for the truncated version
+EPFULL=true
+
+# Set string comparisons to case insensitive
 shopt -s nocasematch
 
 # Check if we have any k5creds files, if not set K5CREDS false so we can prompt for them
@@ -137,12 +142,13 @@ if $EPREQ ; then
   do
     EP_NAME=$(echo $ENDPOINT | cut -f 1 -d ',' | tr '[:lower:]' '[:upper:]' | tr -d '"'  | tr '-' '_')
 
-    # Full endpoint URL including version and project id where applicable
-    EP_URL=$(echo $ENDPOINT | cut -f 2 -d ',' | tr -d '"')
-
-    # endpoint URL without version or project id, same as init.sh used in the K5 examples
-    # EP_URL=$(echo $ENDPOINT | cut -f 2 -d ',' | cut -f 1-3 -d '/' | tr -d '"')
-
+    if $EPFULL; then
+      # Full endpoint URL including API version and project id where applicable
+      EP_URL=$(echo $ENDPOINT | cut -f 2 -d ',' | tr -d '"')
+    else
+      # endpoint URL without version or project id, same as init.sh used in the K5 examples
+      EP_URL=$(echo $ENDPOINT | cut -f 2 -d ',' | cut -f 1-3 -d '/' | tr -d '"')
+    fi
     export $EP_NAME=$EP_URL
     echo "$EP_NAME=$EP_URL"
   done
@@ -155,7 +161,11 @@ export OS_REGION_NAME=$REGION
 export OS_USER_DOMAIN_NAME=$CONTRACT
 export OS_PROJECT_NAME=$PROJECT
 export OS_PROJECT_ID=$PROJECT_ID
-export OS_AUTH_URL=$IDENTITYV3
+if $EPFULL; then
+  export OS_AUTH_URL=$IDENTITYV3
+else
+  export OS_AUTH_URL=$IDENTITYV3/v3
+fi
 export OS_VOLUME_API_VERSION=2
 export OS_IDENTITY_API_VERSION=3
 
@@ -163,6 +173,7 @@ export OS_IDENTITY_API_VERSION=3
 unset K5CREDS
 unset CREDS
 unset EPREQ
+unset EPFULL
 unset PROJECT
 unset PROJECTS
 unset ENDPOINT
