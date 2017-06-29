@@ -12,7 +12,7 @@ REGION=K5Region
 If no k5creds files exist you will be prompted to enter details after which a file will be saved for future use.
 API environment variables will only be set if required. By default API endpoint variables will include the API
 version and project id if returned, if you wish to use the truncated endpoint variable as seen in the examples
-in the documentation then edit the script as change EPFULL=true to EPFULL=false.
+in the documentation then edit the script and change EPFULL=true to EPFULL=false.
 
 The script should be dot sourced when called:
 
