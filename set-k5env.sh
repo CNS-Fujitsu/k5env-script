@@ -38,7 +38,7 @@ if $K5CREDS ; then
     K5CREDS=false
   else
     CHOICE=$(($CHOICE-1))
-    
+
     # read the chosen creds file and set auth vars
     FILE="./k5creds_${CREDS[$CHOICE]}.txt"
     while IFS= read LINE || [[ -n "$LINE" ]]
@@ -82,7 +82,7 @@ CSV=$(curl -X GET -k -s $IDENTITYV3/users/$USER_ID/projects -H "X-Auth-Token: $O
 
 # Save the projects to a csv in the current folder
 echo "$CSV" > "./${CONTRACT}_projects.csv"
-  
+
 # Prompt for something to use to locate the correct project
   echo -en "\nEnter all or part of your project name (leave blank to see all): "
 read PROJECT
@@ -172,6 +172,9 @@ export OS_IDENTITY_API_VERSION=3
 # Tidy up
 unset K5CREDS
 unset CREDS
+unset CSV
+unset RETURN
+unset INDEX
 unset EPREQ
 unset EPFULL
 unset PROJECT
